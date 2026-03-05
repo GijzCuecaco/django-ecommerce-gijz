@@ -1,0 +1,85 @@
+{% extends 'homepage/base.html' %}
+{% block title %}Search Results — My Shop{% endblock %}
+{% block content %}
+
+<div style="margin-bottom: 40px;">
+  <h2>Search Results</h2>
+  <p style="color: var(--text-muted); font-size: 16px; margin-top: -20px;">
+    {% if query %}
+      Found <strong>{{ result_count }}</strong> result{% if result_count != 1 %}s{% endif %} for "<strong>{{ query }}</strong>"
+    {% else %}
+      Enter a search term to find products
+    {% endif %}
+  </p>
+</div>
+
+{% if products %}
+  <div class="grid">
+    {% for p in products %}
+      <div class="card">
+        <div style="position: relative;">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" alt="{{ p.name }}" />
+          {% else %}
+            <div style="width: 100%; height: 180px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; opacity: 0.3;">
+              <i class="fas fa-box" style="font-size: 40px;"></i>
+            </div>
+          {% endif %}
+          
+          {% if p.discount_price %}
+            <div style="position: absolute; top: 12px; right: 12px; background: var(--danger); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">-{{ p.discount_percentage }}%</div>
+          {% endif %}
+        </div>
+        
+        <h3>{{ p.name }}</h3>
+        
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: var(--accent);">
+          <div style="display: flex; gap: 2px;">
+            {% for i in "12345" %}
+              {% if i|add:0 <= p.rating %}
+                <i class="fas fa-star"></i>
+              {% else %}
+                <i class="far fa-star"></i>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <span style="color: var(--text-muted); font-size: 12px;">{{ p.rating|floatformat:1 }}</span>
+        </div>
+        
+        {% if p.discount_price %}
+          <div class="price">${{ p.discount_price }}</div>
+          <div style="text-decoration: line-through; color: var(--text-muted); font-size: 14px;">${{ p.price }}</div>
+        {% else %}
+          <div class="price">${{ p.price }}</div>
+        {% endif %}
+        
+        <p style="font-size: 13px;">{{ p.description|truncatechars:80 }}</p>
+        
+        <div class="actions">
+          <a class="btn secondary" href="{% url 'product_detail' p.slug %}">
+            <i class="fas fa-eye"></i> View
+          </a>
+          <form method="post" action="{% url 'add_to_cart' %}" style="flex: 1;">
+            {% csrf_token %}
+            <input type="hidden" name="product_id" value="{{ p.id }}">
+            <input type="hidden" name="quantity" value="1">
+            <button class="btn primary" type="submit" style="width: 100%;">
+              <i class="fas fa-cart-plus"></i> Add
+            </button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card empty-state" style="text-align: center; padding: 80px 20px;">
+    <i class="fas fa-search" style="font-size: 80px; opacity: 0.3; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+    <p style="font-size: 20px; margin-bottom: 10px;">No products found</p>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Try searching with different keywords or browse our categories.</p>
+    <a class="btn primary" href="{% url 'product_list' %}">
+      <i class="fas fa-shopping-bag"></i> Back to Shop
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

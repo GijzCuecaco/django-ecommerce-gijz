@@ -1,0 +1,76 @@
+{% extends 'homepage/base.html' %}
+{% block title %}My Orders — My Shop{% endblock %}
+{% block content %}
+
+<div style="margin-bottom: 40px;">
+  <h2><i class="fas fa-history"></i> Order History</h2>
+  <p style="color: var(--text-muted); font-size: 16px; margin-top: -20px;">Track and manage your orders</p>
+</div>
+
+{% if orders %}
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    {% for order in orders %}
+      <div class="card">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 20px; align-items: center;">
+          <div>
+            <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Order Number</div>
+            <div style="font-weight: 700; font-size: 16px;">{{ order.order_number }}</div>
+          </div>
+          
+          <div>
+            <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Order Date</div>
+            <div style="font-weight: 600;">{{ order.created|date:"M d, Y" }}</div>
+          </div>
+          
+          <div>
+            <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Total</div>
+            <div style="font-weight: 700; color: var(--primary); font-size: 16px;">${{ order.total }}</div>
+          </div>
+          
+          <div>
+            <span style="display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; 
+              background: {% if order.status == 'delivered' %}rgba(16, 185, 129, 0.1){% elif order.status == 'shipped' %}rgba(59, 130, 246, 0.1){% elif order.status == 'cancelled' %}rgba(239, 68, 68, 0.1){% else %}rgba(245, 158, 11, 0.1){% endif %};
+              color: {% if order.status == 'delivered' %}#6ee7b7{% elif order.status == 'shipped' %}#60a5fa{% elif order.status == 'cancelled' %}#fca5a5{% else %}#fcd34d{% endif %};">
+              {{ order.get_status_display }}
+            </span>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px;">
+          <button onclick="document.getElementById('items-{{ order.id }}').style.display = document.getElementById('items-{{ order.id }}').style.display === 'none' ? 'block' : 'none'" class="btn ghost" style="flex: 1;">
+            <i class="fas fa-list"></i> View Items
+          </button>
+          <a href="{% url 'product_list' %}" class="btn secondary" style="flex: 1; text-align: center;">
+            <i class="fas fa-shopping-bag"></i> Shop More
+          </a>
+        </div>
+        
+        <div id="items-{{ order.id }}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+          <h5 style="margin-top: 0;">Items in this order:</h5>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            {% for item in order.items.all %}
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(99, 102, 241, 0.05); border-radius: 6px;">
+                <div>
+                  <div style="font-weight: 600;">{{ item.product.name }}</div>
+                  <div style="color: var(--text-muted); font-size: 12px;">Qty: {{ item.quantity }}</div>
+                </div>
+                <div style="font-weight: 700;">${{ item.line_total }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card empty-state" style="text-align: center; padding: 80px 20px;">
+    <i class="fas fa-inbox" style="font-size: 80px; opacity: 0.3; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+    <p style="font-size: 20px; margin-bottom: 10px;">No orders yet</p>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Start shopping to place your first order!</p>
+    <a class="btn primary" href="{% url 'product_list' %}">
+      <i class="fas fa-shopping-bag"></i> Start Shopping
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

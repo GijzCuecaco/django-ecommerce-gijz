@@ -1,0 +1,294 @@
+{% extends 'homepage/base.html' %}
+{% block title %}{{ product.name }} — My Shop{% endblock %}
+{% block content %}
+
+<div style="max-width: 1200px; margin: 0 auto;">
+  <!-- Breadcrumb -->
+  <div style="display: flex; gap: 8px; margin-bottom: 30px; color: var(--text-muted); font-size: 14px;">
+    <a href="{% url 'product_list' %}" style="color: var(--primary); text-decoration: none;">Shop</a>
+    <span>/</span>
+    <span>{{ product.name }}</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 60px;">
+    <!-- Product Image -->
+    <div>
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; border-radius: 12px; object-fit: cover; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
+      {% else %}
+        <div style="width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; opacity: 0.3;">
+          <i class="fas fa-box" style="font-size: 80px;"></i>
+        </div>
+      {% endif %}
+
+      <!-- Stock Status -->
+      <div style="margin-top: 20px;">
+        {% if product.stock > 0 %}
+          <div style="background: var(--success); color: white; padding: 12px 16px; border-radius: 8px; text-align: center; font-weight: 600;">
+            <i class="fas fa-check-circle"></i> In Stock
+          </div>
+        {% else %}
+          <div style="background: var(--danger); color: white; padding: 12px 16px; border-radius: 8px; text-align: center; font-weight: 600;">
+            <i class="fas fa-times-circle"></i> Out of Stock
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Product Details -->
+    <div>
+      <!-- Title & Category -->
+      <div style="margin-bottom: 20px;">
+        {% if product.category %}
+          <div style="display: inline-block; background: rgba(99,102,241,0.1); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 12px;">
+            {{ product.category.name }}
+          </div>
+        {% endif %}
+        <h1 style="margin: 0; font-size: 32px; margin-bottom: 12px;">{{ product.name }}</h1>
+      </div>
+
+      <!-- Rating -->
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-color);">
+        <div style="display: flex; gap: 4px; color: var(--accent); font-size: 18px;">
+          {% for i in "12345" %}
+            {% if i|add:0 <= avg_rating %}
+              <i class="fas fa-star"></i>
+            {% elif i|add:0 == avg_rating|add:1 %}
+              <i class="fas fa-star-half-alt"></i>
+            {% else %}
+              <i class="far fa-star"></i>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <span style="font-weight: 600;">{{ avg_rating|floatformat:1 }} / 5</span>
+        <span style="color: var(--text-muted);">({{ review_count }} reviews)</span>
+      </div>
+
+      <!-- Price -->
+      <div style="margin-bottom: 24px;">
+        {% if product.discount_price %}
+          <div style="font-size: 32px; font-weight: 800; color: var(--accent); margin-bottom: 8px;">
+            ${{ product.discount_price }}
+            <span style="font-size: 20px; text-decoration: line-through; color: var(--text-muted); margin-left: 12px;">${{ product.price }}</span>
+            <span style="background: var(--danger); color: white; padding: 4px 8px; border-radius: 4px; font-size: 14px; margin-left: 8px;">-{{ product.discount_percentage }}%</span>
+          </div>
+        {% else %}
+          <div style="font-size: 32px; font-weight: 800; color: var(--accent); margin-bottom: 8px;">
+            ${{ product.price }}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); line-height: 1.6;">
+        {{ product.description }}
+      </div>
+
+      <!-- Stock Info -->
+      <div style="margin-bottom: 24px; padding: 16px; background: rgba(99,102,241,0.05); border-radius: 8px; border-left: 4px solid var(--primary);">
+        {% if product.stock > 10 %}
+          <p style="margin: 0; font-weight: 600; color: var(--success);"><i class="fas fa-check"></i> Plenty in stock</p>
+        {% elif product.stock > 0 %}
+          <p style="margin: 0; font-weight: 600; color: var(--warning);"><i class="fas fa-exclamation-triangle"></i> Only {{ product.stock }} left</p>
+        {% else %}
+          <p style="margin: 0; font-weight: 600; color: var(--danger);"><i class="fas fa-times"></i> Out of stock</p>
+        {% endif %}
+      </div>
+
+      <!-- Add to Cart & Wishlist -->
+      <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+        <form method="post" action="{% url 'add_to_cart' %}" style="flex: 1;">
+          {% csrf_token %}
+          <input type="hidden" name="product_id" value="{{ product.id }}">
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+            <label style="font-weight: 600;">Quantity:</label>
+            <select name="quantity" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--dark-bg); color: var(--text-primary); min-width: 100px;">
+              {% for i in "123456789" %}
+                {% if i|add:0 <= product.stock %}
+                  <option value="{{ i }}">{{ i }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn primary" style="width: 100%; padding: 14px; font-size: 16px;" {% if product.stock <= 0 %}disabled{% endif %}>
+            <i class="fas fa-cart-plus"></i> Add to Cart
+          </button>
+        </form>
+
+        <form method="post" action="{% url 'add_to_wishlist' product.id %}" style="flex: 0.2;">
+          {% csrf_token %}
+          <button type="submit" class="btn secondary" style="width: 100%; padding: 14px; font-size: 16px;">
+            <i class="fas fa-heart"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- Back to Shop -->
+      <a href="{% url 'product_list' %}" class="btn secondary" style="display: inline-block; padding: 12px 24px;">
+        <i class="fas fa-arrow-left"></i> Back to Shop
+      </a>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <div style="max-width: 800px; margin: 60px 0;">
+    <h2 style="margin-bottom: 30px;">Customer Reviews</h2>
+
+    <!-- Add Review Form -->
+    <div class="card" style="margin-bottom: 30px; padding: 24px;">
+      <h3 style="margin-top: 0;">Write a Review</h3>
+      <form method="post" action="{% url 'add_review' product.id %}">
+        {% csrf_token %}
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 8px;">Rating</label>
+          <select name="rating" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--dark-bg); color: var(--text-primary);">
+            <option value="">Select a rating...</option>
+            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+            <option value="4">⭐⭐⭐⭐ Very Good</option>
+            <option value="3">⭐⭐⭐ Good</option>
+            <option value="2">⭐⭐ Fair</option>
+            <option value="1">⭐ Poor</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 8px;">Title (optional)</label>
+          <input type="text" name="title" placeholder="Summarize your experience..." style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--dark-bg); color: var(--text-primary);">
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 8px;">Your Review</label>
+          <textarea name="comment" required placeholder="Share your thoughts..." rows="4" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--dark-bg); color: var(--text-primary); font-family: inherit; resize: vertical;"></textarea>
+        </div>
+
+        <button type="submit" class="btn primary">
+          <i class="fas fa-comment"></i> Post Review
+        </button>
+      </form>
+    </div>
+
+    <!-- Reviews List -->
+    {% if reviews %}
+      <div>
+        {% for review in reviews %}
+          <div class="card" style="margin-bottom: 16px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+              <div>
+                <div style="display: flex; gap: 4px; color: var(--accent); margin-bottom: 6px;">
+                  {% for i in "12345" %}
+                    {% if i|add:0 <= review.rating %}
+                      <i class="fas fa-star"></i>
+                    {% else %}
+                      <i class="far fa-star"></i>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% if review.title %}
+                  <h4 style="margin: 0; font-size: 16px;">{{ review.title }}</h4>
+                {% endif %}
+              </div>
+              <span style="color: var(--text-muted); font-size: 12px;">{{ review.created|date:"M d, Y" }}</span>
+            </div>
+
+            <p style="margin-bottom: 12px; color: var(--text-secondary);">{{ review.comment }}</p>
+
+            <div style="display: flex; gap: 16px; color: var(--text-muted); font-size: 12px;">
+              <span style="font-weight: 600;">{{ review.user.username|default:"Anonymous" }}</span>
+              <span><i class="fas fa-thumbs-up"></i> {{ review.helpful_count }} found helpful</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+        <i class="fas fa-comments" style="font-size: 40px; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
+        <p>No reviews yet. Be the first to review this product!</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Related Products -->
+  {% if related_products %}
+    <div style="margin-top: 60px; margin-bottom: 60px;">
+      <h2 style="margin-bottom: 30px;">Related Products</h2>
+      <div class="grid">
+        {% for p in related_products %}
+          <div class="card">
+            <div style="position: relative;">
+              {% if p.image %}
+                <img src="{{ p.image.url }}" alt="{{ p.name }}" />
+              {% else %}
+                <div style="width: 100%; height: 180px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; opacity: 0.3;">
+                  <i class="fas fa-box" style="font-size: 40px;"></i>
+                </div>
+              {% endif %}
+              
+              <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 6px;">
+                {% if p.discount_price %}
+                  <div style="background: var(--danger); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">-{{ p.discount_percentage }}%</div>
+                {% endif %}
+              </div>
+
+              {% if p.stock <= 0 %}
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">OUT OF STOCK</div>
+              {% endif %}
+            </div>
+            
+            <h3>{{ p.name }}</h3>
+            
+            <!-- Rating -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div style="display: flex; gap: 2px; color: var(--accent);">
+                {% for i in "12345" %}
+                  {% if i|add:0 <= p.rating %}
+                    <i class="fas fa-star"></i>
+                  {% elif i|add:0 == p.rating|add:1 %}
+                    <i class="fas fa-star-half-alt"></i>
+                  {% else %}
+                    <i class="far fa-star"></i>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <span style="color: var(--text-muted); font-size: 12px;">{{ p.rating|floatformat:1 }}</span>
+            </div>
+
+            <!-- Price -->
+            <div style="margin-bottom: 8px;">
+              {% if p.discount_price %}
+                <div class="price">${{ p.discount_price }}</div>
+                <div style="text-decoration: line-through; color: var(--text-muted); font-size: 14px;">${{ p.price }}</div>
+              {% else %}
+                <div class="price">${{ p.price }}</div>
+              {% endif %}
+            </div>
+
+            <p style="font-size: 13px;">{{ p.description|truncatechars:80 }}</p>
+            
+            <div class="actions">
+              <a class="btn secondary" href="{% url 'product_detail' p.slug %}">
+                <i class="fas fa-eye"></i> View
+              </a>
+              <form method="post" action="{% url 'add_to_cart' %}" style="flex: 1;">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ p.id }}">
+                <input type="hidden" name="quantity" value="1">
+                <button class="btn primary" type="submit" style="width: 100%;" {% if p.stock <= 0 %}disabled{% endif %}>
+                  <i class="fas fa-cart-plus"></i> Add
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    [style*="grid-template-columns: 1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+{% endblock %}

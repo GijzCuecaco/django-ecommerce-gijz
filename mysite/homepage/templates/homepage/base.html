@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}GijzPogiRNDMITEMS SHOP{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-normalize/modern-normalize.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Light Mode Colors */
+    html[data-theme="light"] {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --accent: #db2777;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --dark-bg: #ffffff;
+      --card-bg: #f3f4f6;
+      --border-color: #d1d5db;
+      --text-primary: #1f2937;
+      --text-secondary: #374151;
+      --text-muted: #6b7280;
+    }
+
+    /* Dark Mode Colors */
+    html[data-theme="dark"] {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --accent: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark-bg: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+      color: var(--text-primary);
+      background: var(--dark-bg);
+      background-attachment: fixed;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Animated background elements */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1), transparent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    html[data-theme="light"] body::before {
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.08), transparent);
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      left: 0;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.1), transparent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    html[data-theme="light"] body::after {
+      background: radial-gradient(circle, rgba(219, 39, 119, 0.08), transparent);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HEADER & NAVIGATION */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(10px);
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 20px;
+      transition: border-color 0.3s ease;
+    }
+
+    .brand {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand a {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand i {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    nav {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    nav a:hover {
+      color: var(--primary);
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none;
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.08) rotate(20deg);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+
+    /* MESSAGES */
+    .messages-container {
+      margin-bottom: 30px;
+    }
+
+    .message {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+      border-left: 4px solid;
+      transition: all 0.3s ease;
+    }
+
+    .message.success {
+      background: rgba(16, 185, 129, 0.1);
+      color: #6ee7b7;
+      border-left-color: #10b981;
+    }
+
+    html[data-theme="light"] .message.success {
+      background: rgba(5, 150, 105, 0.1);
+      color: #059669;
+      border-left-color: #059669;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border-left-color: #ef4444;
+    }
+
+    html[data-theme="light"] .message.error {
+      background: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border-left-color: #dc2626;
+    }
+
+    .message.info {
+      background: rgba(99, 102, 241, 0.1);
+      color: #a5b4fc;
+      border-left-color: #6366f1;
+    }
+
+    html[data-theme="light"] .message.info {
+      background: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+      border-left-color: #2563eb;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* GRID LAYOUT */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+      margin-bottom: 40px;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    html[data-theme="dark"] .card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.6));
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .card:hover::before {
+      left: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2), 0 0 30px rgba(236, 72, 153, 0.1);
+    }
+
+    html[data-theme="light"] .card:hover {
+      box-shadow: 0 20px 40px rgba(37, 99, 235, 0.15), 0 0 30px rgba(219, 39, 119, 0.08);
+    }
+
+    .card h3 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin: 12px 0;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover img {
+      transform: scale(1.05);
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 12px 0;
+    }
+
+    /* PRICE */
+    .price {
+      font-weight: 800;
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 12px 0;
+    }
+
+    /* BUTTONS */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex: 1;
+      min-height: 44px;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn.secondary {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    html[data-theme="light"] .btn.secondary {
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+    }
+
+    .btn.secondary:hover {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1.5px solid var(--border-color);
+    }
+
+    .btn.ghost:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* HEADINGS */
+    h1, h2 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 32px;
+      background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* TABLES */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    thead {
+      background: rgba(99, 102, 241, 0.1);
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    html[data-theme="light"] thead {
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    tbody tr:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    html[data-theme="light"] tbody tr:hover {
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    /* FOOTER */
+    footer {
+      margin-top: 60px;
+      padding: 40px 0;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-muted);
+      transition: border-color 0.3s ease;
+    }
+
+    footer strong {
+      color: var(--text-secondary);
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-state i {
+      font-size: 64px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-controls {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      nav {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      h1, h2 {
+        font-size: 24px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .btn {
+        flex: 1;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <i class="fas fa-shopping-bag"></i>
+        <a href="{% url 'product_list' %}">My Shop</a>
+      </div>
+      <div class="header-controls">
+        <nav>
+          <a href="{% url 'product_list' %}"><i class="fas fa-boxes"></i>Products</a>
+          {% if user.is_authenticated %}<a href="{% url 'wishlist_view' %}"><i class="fas fa-heart"></i>Wishlist</a>{% endif %}
+          {% if user.is_authenticated %}<a href="{% url 'order_history' %}"><i class="fas fa-history"></i>Orders</a>{% endif %}
+          <a href="{% url 'cart_view' %}"><i class="fas fa-shopping-cart"></i>Cart</a>
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; font-size: inherit; padding: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-sign-out-alt"></i>Logout
+              </button>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i>Login</a>
+          {% endif %}
+        </nav>
+        <form action="{% url 'search_products' %}" method="get" style="display: flex; gap: 8px; margin: 0;">
+          <input type="text" name="q" placeholder="Search products..." style="padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; color: var(--text-primary); width: 200px;" />
+          <button type="submit" class="theme-toggle" style="background: transparent; border: 1px solid var(--border-color); width: auto; color: var(--text-primary); padding: 0 14px;">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    {% if messages %}
+      <div class="messages-container">
+        {% for m in messages %}
+          <div class="message success">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ m }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <footer>
+      <p><strong>✨ Built with Django</strong> — Modern ecommerce demo</p>
+      <p style="margin-top: 16px; font-size: 13px;">Crafted with <i class="fas fa-heart" style="color: var(--accent);"></i> by Gijz Cuecaco</p>
+    </footer>
+  </div>
+
+  <script>
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    // Check for saved theme preference or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    html.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    // Theme toggle button click handler
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    });
+
+    // Update icon based on theme
+    function updateThemeIcon(theme) {
+      const icon = themeToggle.querySelector('i');
+      if (theme === 'dark') {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+        themeToggle.title = 'Switch to light mode';
+      } else {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        themeToggle.title = 'Switch to dark mode';
+      }
+    }
+  </script>
+</body>
+</html>

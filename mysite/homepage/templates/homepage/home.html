@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>GuessTheNumberGAME — Fun Edition</title>
+		<style>
+			:root{
+				--bg1:#071029; --bg2:#07182a; --card:#071229; --accent:#7ee787; --accent-2:#60a5fa; --muted:#9fb0c8; --glass:rgba(255,255,255,0.04)
+			}
+			*{box-sizing:border-box}
+			html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:radial-gradient(1200px 400px at 10% 10%, rgba(96,165,250,0.06), transparent), linear-gradient(180deg,var(--bg1),var(--bg2));color:#e8f0fb}
+			.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:36px}
+			.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:28px;max-width:720px;width:100%;box-shadow:0 12px 40px rgba(3,8,20,0.6);border:1px solid rgba(255,255,255,0.03);position:relative;overflow:hidden}
+
+			header{display:flex;align-items:center;gap:14px}
+			.logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#04251a;font-size:20px;box-shadow:0 6px 18px rgba(96,165,250,0.12)}
+			h1{margin:0;font-size:20px}
+			p.lead{margin:6px 0 18px;color:var(--muted)}
+
+			.status{margin:8px 0;padding:12px;border-radius:10px;background:linear-gradient(90deg,rgba(0,0,0,0.18),rgba(255,255,255,0.02));font-weight:700;display:flex;align-items:center;gap:10px}
+			.hint{font-size:14px}
+
+			.controls{display:flex;gap:10px;align-items:center;margin-top:10px}
+			input[type=number]{width:140px;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-size:16px;outline:none;transition:transform .12s}
+			input[type=number]:focus{transform:translateY(-2px);box-shadow:0 6px 18px rgba(96,165,250,0.06)}
+			button{padding:10px 14px;border-radius:10px;border:0;background:linear-gradient(180deg,var(--accent),#3bd36a);color:#03231a;font-weight:800;cursor:pointer;letter-spacing:0.3px}
+			button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:700}
+
+			.meta{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-top:16px;color:var(--muted);font-size:14px}
+			.bar{height:12px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;flex:1;margin-left:10px}
+			.bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent-2),var(--accent));width:100%;transition:width .4s ease}
+
+			.lowhigh{display:flex;gap:12px;align-items:center}
+			footer{margin-top:18px;color:var(--muted);font-size:13px}
+
+			/* Confetti */
+			.confetti-piece{position:absolute;pointer-events:none;will-change:transform,opacity}
+
+			/* small animations */
+			.shake{animation:shake .4s}
+			@keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+
+			.glow{box-shadow:0 8px 32px rgba(34,197,94,0.2);transform:scale(1.02)}
+
+			@media (max-width:720px){.card{padding:18px}.controls{flex-direction:column;align-items:stretch}input[type=number]{width:100%}}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<main class="card" role="main" id="gameCard">
+				<header>
+								<div class="logo">GTN</div>
+					<div>
+									<h1>GuessTheNumberGAME</h1>
+									<p class="lead">I picked a number between <strong>1</strong> and <strong>100</strong>. Beat the computer in 10 tries — earn glory and confetti.</p>
+					</div>
+				</header>
+
+				<div class="status" id="status"><span class="hint">Good luck — make your first guess!</span></div>
+
+				<div class="controls">
+					<input id="guessInput" type="number" min="1" max="100" placeholder="Enter 1–100" aria-label="Your guess">
+					<button id="guessBtn">Guess</button>
+					<button id="restartBtn" class="secondary">Restart</button>
+					  <div style="margin-left:auto;color:var(--muted);font-weight:700">Score: <span id="score">0</span></div>
+				</div>
+
+				<div class="meta">
+					<div>Tries left: <strong id="tries">10</strong></div>
+					<div class="bar" title="Tries remaining"><i id="triesBar" style="width:100%"></i></div>
+					<div class="lowhigh">Low: <span id="low">—</span> • High: <span id="high">—</span></div>
+				</div>
+
+				<footer>
+					Tip: Press Enter to submit. Close guesses give special messages. Sounds and confetti included. (Client-only)
+					<div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.04);font-size:12px">
+						<strong>Contact:</strong> Gijz Cuecaco | 📞 09453096165
+					</div>
+				</footer>
+			</main>
+		</div>
+
+		<script>
+			(function(){
+				// Elements
+				const status = document.getElementById('status');
+				const guessInput = document.getElementById('guessInput');
+				const guessBtn = document.getElementById('guessBtn');
+				const restartBtn = document.getElementById('restartBtn');
+				const triesEl = document.getElementById('tries');
+				const lowEl = document.getElementById('low');
+				const highEl = document.getElementById('high');
+				const triesBar = document.getElementById('triesBar');
+				const scoreEl = document.getElementById('score');
+				const card = document.getElementById('gameCard');
+
+				// Game state
+				let secret = null, tries = 10, lowest = null, highest = null, done = false, score = 0;
+
+				// WebAudio simple tones
+				const AudioCtx = window.AudioContext || window.webkitAudioContext;
+				const actx = AudioCtx ? new AudioCtx() : null;
+				function playTone(freq, dur=0.12, type='sine'){
+					if(!actx) return;
+					const o = actx.createOscillator();
+					const g = actx.createGain();
+					o.type = type; o.frequency.value = freq;
+					g.gain.setValueAtTime(0.0001, actx.currentTime);
+					g.gain.exponentialRampToValueAtTime(0.12, actx.currentTime + 0.01);
+					o.connect(g); g.connect(actx.destination);
+					o.start();
+					g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+					o.stop(actx.currentTime + dur + 0.02);
+				}
+
+				// Confetti generator (DOM-based)
+				function launchConfetti(count=40){
+					const colors = ['#F97316','#FB7185','#FDE68A','#34D399','#60A5FA','#A78BFA'];
+					for(let i=0;i<count;i++){
+						const el = document.createElement('div');
+						el.className = 'confetti-piece';
+						const size = Math.floor(Math.random()*10)+6;
+						el.style.width = size+'px'; el.style.height = (size*0.6)+'px';
+						el.style.left = Math.random()*80 + 10 + '%';
+						el.style.top = '-10%';
+						el.style.background = colors[Math.floor(Math.random()*colors.length)];
+						el.style.opacity = 0.95;
+						el.style.transform = 'rotate('+Math.floor(Math.random()*360)+'deg)';
+						el.style.transition = 'transform 2.4s linear, top 2.4s ease-in, opacity 2.4s ease';
+						document.body.appendChild(el);
+						// force layout
+						void el.offsetWidth;
+						el.style.top = (60 + Math.random()*40) + '%';
+						el.style.transform = 'translateY(0) rotate('+(Math.random()*720)+'deg)';
+						setTimeout(()=>{ el.style.opacity = 0; }, 1800 + Math.random()*400);
+						setTimeout(()=> el.remove(), 2600 + Math.random()*600);
+					}
+				}
+
+				function setStatus(text, color){
+					status.textContent = '';
+					const span = document.createElement('span'); span.className='hint'; span.textContent = text;
+					status.appendChild(span);
+					status.style.color = color || '';
+				}
+
+				function updateBar(){
+					triesEl.textContent = tries;
+					const pct = Math.max(0, Math.min(100, (tries/10)*100));
+					triesBar.style.width = pct + '%';
+				}
+
+				function newGame(){
+					secret = Math.floor(Math.random()*100)+1;
+					tries = 10; lowest = null; highest = null; done = false;
+					updateBar(); lowEl.textContent='—'; highEl.textContent='—'; guessInput.value=''; guessInput.disabled=false; guessBtn.disabled=false; card.classList.remove('glow');
+					setStatus('Good luck — make your first guess!');
+					guessInput.focus();
+					console.debug('Secret number:', secret);
+				}
+
+				function handleWin(){
+					setStatus('Amazing! You guessed it! 🎉', '#22c55e');
+					card.classList.add('glow');
+					playTone(880,0.18,'sine'); playTone(1100,0.12,'sine');
+					launchConfetti(70);
+					done = true; guessInput.disabled=true; guessBtn.disabled=true; score += tries*10; scoreEl.textContent = score;
+				}
+
+				function handleLoss(){
+					setStatus('Out of tries — the number was ' + secret + '. Try again!', '#ef4444');
+					playTone(160,0.18,'sawtooth'); card.classList.add('shake');
+					setTimeout(()=>card.classList.remove('shake'),400);
+					done = true; guessInput.disabled=true; guessBtn.disabled=true;
+				}
+
+				function handleGuess(){
+					if(done) return;
+					const v = parseInt(guessInput.value,10);
+					if(Number.isNaN(v) || v<1 || v>100){ setStatus('Enter a valid number between 1 and 100.', '#f59e0b'); playTone(220,0.08,'square'); return; }
+					if(lowest===null||v<lowest) lowest=v; if(highest===null||v>highest) highest=v; lowEl.textContent=lowest; highEl.textContent=highest;
+
+					if(v === secret){ handleWin(); return; }
+
+					tries -= 1; updateBar();
+					const diff = Math.abs(v - secret);
+					if(diff <= 2){ setStatus((v < secret ? 'A little low — almost there!' : 'A little high — almost there!') + ' 🔥'); playTone(720,0.09,'sine'); }
+					else if(diff <= 6){ setStatus((v < secret ? 'Too low, but close.' : 'Too high, but close.')); playTone(520,0.08,'triangle'); }
+					else { setStatus(v < secret ? 'Too low.' : 'Too high.'); playTone(320,0.06,'sawtooth'); }
+
+					// small shake on wrong
+					card.classList.add('shake'); setTimeout(()=>card.classList.remove('shake'),300);
+
+					if(tries <= 0){ handleLoss(); }
+					guessInput.value=''; guessInput.focus();
+				}
+
+				// Event bindings
+				guessBtn.addEventListener('click', handleGuess);
+				guessInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') handleGuess(); });
+				restartBtn.addEventListener('click', newGame);
+
+				// Start
+				newGame();
+			})();
+		</script>
+	</body>
+</html>
+
+cd "c:\Users\GARRY CUECACO\Desktop\django_lesson\mysite"
+python -m pip install --upgrade pip
+pip install django
+python manage.py makemigrations
+python manage.py migrate
+python manage.py create_initial_data
