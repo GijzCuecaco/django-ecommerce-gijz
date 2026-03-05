@@ -34,7 +34,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-secret-key')
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
 # production hosts
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = ['django-ecommerce-gijz.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
