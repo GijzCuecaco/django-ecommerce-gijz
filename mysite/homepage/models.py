@@ -128,7 +128,7 @@ class Order(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
 	customer_name = models.CharField(max_length=200)
 	email = models.EmailField(blank=True)
-	phone = models.CharField(max_length=20, blank=True, default='')
+	phone = models.CharField(max_length=20)
 	address = models.TextField()
 	city = models.CharField(max_length=100, blank=True)
 	postal_code = models.CharField(max_length=20, blank=True)
